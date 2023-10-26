@@ -1,0 +1,72 @@
+[tool.poetry]
+name = "robo-mo"
+version = "0.1.0"
+description = ""
+authors = ["Michael Landis <michael@momentohq.com>"]
+readme = "README.md"
+packages = [{ include = "robo_mo" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+python-dotenv = "^1.0.0"
+langchain = "^0.0.312"
+momento = "^1.10.1"
+openai = "^0.27.8"
+streamlit = "^1.24.0"
+watchdog = "^3.0.0"
+tiktoken = "^0.4.0"
+boto3 = "^1.28.2"
+
+[tool.poetry.group.lint.dependencies]
+mypy = "^1.4.0"
+ruff = "^0.0.275"
+
+
+[tool.poetry.group.poc.dependencies]
+jupyter = "^1.0.0"
+bs4 = "^0.0.1"
+lxml = "^4.9.3"
+nest-asyncio = "^1.5.8"
+
+
+[tool.poetry.group.format.dependencies]
+black = "^23.9.1"
+
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+include = "\\.pyi?$"
+exclude = """
+/(
+  \\.git
+  | \\.mypy_cache
+  | \\.pytest_cache
+  | \\.venv
+  | dist
+)
+"""
+
+[tool.ruff]
+select = [
+  "E", # pycodestyle errors
+  "W", # pycodestyle warnings
+  "F", # pyflakes
+  "I", # isort
+  "C", # flake8-comprehensions
+  "B", # flake8-bugbear
+]
+ignore = [
+  "E501", # line too long, handled by black
+  "C901", # function too complex
+]
+fix = true
+target-version = "py311"
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

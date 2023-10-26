@@ -15,7 +15,7 @@ The project is structured as follows:
 | ├── prompts.py ................ customized prompts for the chatbot
 | ├── callbacks.py .............. streaming callback functions
 | └── secrets.py ................ helpers to read secrets
-└── notebooks ................... the chat bot application
+├── notebooks ................... the chat bot application
 | └── 01-load-momento-data.ipynb  populates the index with Momento data
 ```
 

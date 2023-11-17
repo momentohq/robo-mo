@@ -9,8 +9,8 @@ packages = [{ include = "robo_mo" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 python-dotenv = "^1.0.0"
-langchain = "^0.0.312"
-momento = "^1.13.2"
+langchain = "^0.0.337"
+momento = "^1.14.1"
 openai = "^0.27.8"
 streamlit = "^1.24.0"
 watchdog = "^3.0.0"

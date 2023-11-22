@@ -1,6 +1,6 @@
 .PHONY: format
 format:
-	@poetry run black robo_mo
+	@poetry run ruff format robo_mo
 
 .PHONY: lint
 lint:

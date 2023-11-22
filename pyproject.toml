@@ -19,7 +19,7 @@ boto3 = "^1.28.2"
 
 [tool.poetry.group.lint.dependencies]
 mypy = "^1.4.0"
-ruff = "^0.0.275"
+ruff = "^0.1.6"
 
 
 [tool.poetry.group.poc.dependencies]
@@ -27,25 +27,6 @@ jupyter = "^1.0.0"
 bs4 = "^0.0.1"
 lxml = "^4.9.3"
 nest-asyncio = "^1.5.8"
-
-
-[tool.poetry.group.format.dependencies]
-black = "^23.9.1"
-
-
-[tool.black]
-line-length = 120
-target-version = ["py311"]
-include = "\\.pyi?$"
-exclude = """
-/(
-  \\.git
-  | \\.mypy_cache
-  | \\.pytest_cache
-  | \\.venv
-  | dist
-)
-"""
 
 [tool.ruff]
 select = [
@@ -62,6 +43,7 @@ ignore = [
 ]
 fix = true
 target-version = "py311"
+line-length = 120
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]

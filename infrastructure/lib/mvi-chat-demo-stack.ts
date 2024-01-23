@@ -132,7 +132,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
     const chatDemoPort = 80;
     chatDemoTaskDefinition.addContainer('mvi-chat-demo-container', {
       containerName: 'chat-demo',
-      image: ecs.ContainerImage.fromAsset('../robo-mo', {
+      image: ecs.ContainerImage.fromAsset('../', {
         platform: Platform.LINUX_AMD64,
       }),
       environment: {

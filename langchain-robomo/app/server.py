@@ -17,6 +17,7 @@ add_routes(app, rag_momento_vector_index_chain, path="/rag-momento-vector-index"
 
 
 app.mount("/static", StaticFiles(directory="frontend/build", html=True), name="static")
+app.mount("/playground2", StaticFiles(directory="playground2/dist", html=True), name="static")
 
 
 if __name__ == "__main__":

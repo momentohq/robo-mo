@@ -3,8 +3,10 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from langserve import add_routes
 from rag_momento_vector_index import chain as rag_momento_vector_index_chain
+from rag_momento_vector_index.index import reindex_content
 
 app = FastAPI()
+
 
 @app.get("/")
 async def redirect_root_to_docs():
@@ -18,6 +20,12 @@ add_routes(app, rag_momento_vector_index_chain, path="/rag-momento-vector-index"
 
 # app.mount("/static", StaticFiles(directory="frontend/build", html=True), name="static")
 app.mount("/playground2", StaticFiles(directory="playground2/dist", html=True), name="static")
+
+
+@app.post("/reindex/{index_name}")
+async def reindex(index_name: str):
+    reindex_content(index_name)
+    return {"message": f"Reindexing {index_name} complete"}
 
 
 if __name__ == "__main__":

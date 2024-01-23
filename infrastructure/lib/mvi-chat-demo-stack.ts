@@ -19,37 +19,9 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
   ) {
     super(scope, id, props);
 
-    const openAiApiKeyParam = new cdk.CfnParameter(this, 'OpenAiApiKey', {
-      type: 'String',
-      description: 'OpenAI API key. See https://openai.com/account/api-keys',
-      noEcho: true,
-    });
+    const openAiApiKeySecret = secrets.Secret.fromSecretNameV2(this, 'open-ai-api-key-secret', 'mvi/OpenAiApiKey');
 
-    const openAiApiKeySecret = new secrets.Secret(
-      this,
-      'open-ai-api-key-secret',
-      {
-        secretName: 'mvi/OpenAiApiKey',
-        secretStringValue: new cdk.SecretValue(openAiApiKeyParam.valueAsString),
-      }
-    );
-
-    const momentoApiKeyParam = new cdk.CfnParameter(this, 'MomentoApiKey', {
-      type: 'String',
-      description: 'Momento API key. See https://console.gomomento.com',
-      noEcho: true,
-    });
-
-    const momentoApiKeySecret = new secrets.Secret(
-      this,
-      'momento-api-key-secret',
-      {
-        secretName: 'mvi/MomentoApiKey',
-        secretStringValue: new cdk.SecretValue(
-          momentoApiKeyParam.valueAsString
-        ),
-      }
-    );
+    const momentoApiKeySecret = secrets.Secret.fromSecretNameV2(this, 'open-ai-api-key-secret', 'mvi/MomentoApiKey');
 
     const vpc = new ec2.Vpc(this, 'mvi-chat-demo-network', {
       vpcName: 'mvi-chat-demo-network',

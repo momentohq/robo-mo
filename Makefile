@@ -1,23 +1,14 @@
-.PHONY: format
-format:
-	@poetry run ruff format robo_mo
+.PHONY: default
 
-.PHONY: lint
-lint:
-	@poetry run ruff check robo_mo
-	@poetry run mypy robo_mo
+default: pull-request-ci
 
-.PHONY: precommit
-precommit: format lint
+pipeline-build: build-common-ts
 
-.PHONY: run-chatbot
-run-chatbot:
-	@poetry run streamlit run robo_mo/chatbot.py
+pipeline-synth: build-common-ts
+	npx cdk synth
 
-.PHONY: docker-build
-docker-build:
-	@docker build -t robo-mo -f Dockerfile .
+build-common-ts:
+	npm ci --verbose && npm run build
 
-.PHONY: docker-run
-docker-run:
-	@docker run -p 8501:8501 -e MOMENTO_API_KEY=${MOMENTO_API_KEY} -e OPENAI_API_KEY=${OPENAI_API_KEY} -it robo-mo poetry run streamlit run robo_mo/chatbot.py
+pull-request-ci: build-common-ts
+	MOCK_LOOKUPS_FOR_CI_SYNTH=true npx cdk --app "npx ts-node --prefer-ts-exts bin/infrastructure.ts" synth

@@ -21,7 +21,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
 
     const openAiApiKeySecret = secrets.Secret.fromSecretNameV2(this, 'open-ai-api-key-secret', 'mvi/OpenAiApiKey');
 
-    const momentoApiKeySecret = secrets.Secret.fromSecretNameV2(this, 'open-ai-api-key-secret', 'mvi/MomentoApiKey');
+    const momentoApiKeySecret = secrets.Secret.fromSecretNameV2(this, 'momento-api-key-secret', 'mvi/MomentoApiKey');
 
     const vpc = new ec2.Vpc(this, 'mvi-chat-demo-network', {
       vpcName: 'mvi-chat-demo-network',

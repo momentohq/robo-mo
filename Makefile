@@ -24,7 +24,7 @@ run-chatbot:
 
 .PHONY: docker-build
 docker-build:
-	@docker build -t robo-mo -f Dockerfile .
+	docker build -t robo-mo -f Dockerfile .
 
 .PHONY: docker-run
 docker-run:

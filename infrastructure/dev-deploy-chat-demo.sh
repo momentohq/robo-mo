@@ -1,6 +1,6 @@
 set -ex
 
-export AWS_PROFILE=dev
+export AWS_PROFILE=michael
 
 # Domain to use for the mvi service
 export MVI_CHAT_DOMAIN=${MVI_CHAT_DOMAIN:-developer-michael-dev.preprod.a.momentohq.com}

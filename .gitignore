@@ -15,6 +15,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+!/infrastructure/lib/ 
 lib64/
 parts/
 sdist/
@@ -153,3 +154,6 @@ cython_debug/
 
 data/
 .vscode
+
+.DS_Store
+

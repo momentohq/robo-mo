@@ -22,9 +22,6 @@ precommit: format lint
 run-chatbot:
 	@poetry run streamlit run robo_mo/chatbot.py
 
-python-install:
-	pipx install poetry && poetry install
-
 .PHONY: docker-build
 docker-build:
 	@docker build -t robo-mo -f Dockerfile .

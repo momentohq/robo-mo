@@ -34,4 +34,4 @@ build-common-ts:
 	cd infrastructure && npm ci --verbose && npm run build && cd ..
 
 pull-request-ci: build-common-ts docker-build
-	cd infrastructure && MOCK_LOOKUPS_FOR_CI_SYNTH=true npx cdk --app "npx ts-node --prefer-ts-exts bin/infrastructure.ts" synth
+	cd infrastructure && MVI_CHAT_DOMAIN=sample.com MOCK_LOOKUPS_FOR_CI_SYNTH=true npx cdk --app "npx ts-node --prefer-ts-exts bin/infrastructure.ts" synth

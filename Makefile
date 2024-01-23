@@ -23,7 +23,7 @@ run-chatbot:
 	@poetry run streamlit run robo_mo/chatbot.py
 
 python-install:
-	pip install poetry && poetry install
+	pipx install poetry && poetry install
 
 .PHONY: docker-build
 docker-build:

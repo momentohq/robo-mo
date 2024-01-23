@@ -5,7 +5,7 @@ default: pull-request-ci
 pipeline-build: build-common-ts
 
 pipeline-synth: build-common-ts
-	npx cdk synth
+	cd infrastructure && npx cdk synth
 
 format:
 	@poetry run ruff format robo_mo

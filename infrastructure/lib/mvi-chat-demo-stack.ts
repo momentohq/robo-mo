@@ -80,13 +80,9 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
     );
 
     // Register the mo-chat subdomain and create a certificate for it
-    const hostedZone = route53.HostedZone.fromLookup(
-      this,
-      'mvi-chat-hosted-zone',
-      {
-        domainName: chatDomain,
-      }
-    );
+    const hostedZone = new route53.HostedZone(this, 'mvi-chat-hosted-zone', {
+      zoneName: chatDomain
+    });
 
     new route53.ARecord(this, 'mvi-chat-demo-dns-a-record', {
       zone: hostedZone,

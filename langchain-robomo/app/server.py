@@ -27,7 +27,7 @@ from rag_momento_vector_index.index import reindex_content  # noqa: E402
 app = FastAPI()
 
 origins = [
-    "*,
+    "*",
 ]
 
 app.add_middleware(

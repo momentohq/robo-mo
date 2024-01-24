@@ -1,3 +1,4 @@
+import {Construct} from 'constructs';
 import * as cdk from 'aws-cdk-lib';
 import * as certmgr from 'aws-cdk-lib/aws-certificatemanager';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
@@ -7,7 +8,6 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
-import {Construct} from 'constructs';
 import { RobomoDiscordBot } from './robomo-discord-bot';
 
 export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
@@ -55,19 +55,15 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
     });
 
     // Register the mo-chat subdomain and create a certificate for it
-    let hostedZone: cdk.aws_route53.IHostedZone
+    let hostedZone: cdk.aws_route53.IHostedZone;
     if (props.isCi) {
-        hostedZone = new route53.HostedZone(this, 'mvi-chat-hosted-zone', {
-          zoneName: props.chatDomain,
-        });
+      hostedZone = new route53.HostedZone(this, 'mvi-chat-hosted-zone', {
+        zoneName: props.chatDomain,
+      });
     } else {
-      hostedZone = route53.HostedZone.fromLookup(
-        this,
-        'mvi-chat-hosted-zone',
-        {
-          domainName: props.chatDomain,
-        }
-      );
+      hostedZone = route53.HostedZone.fromLookup(this, 'mvi-chat-hosted-zone', {
+        domainName: props.chatDomain,
+      });
     }
 
     this.addEcsApp({
@@ -141,6 +137,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       this,
       `${options.appName}-alb`,
       {
+        idleTimeout: cdk.Duration.seconds(60 * 10),
         vpc: options.vpc,
         internetFacing: true,
         securityGroup: loadBalancerSecurityGroup,
@@ -243,6 +240,9 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       port: options.containerPort,
       targets: [chatService],
       protocol: elbv2.ApplicationProtocol.HTTP,
+      healthCheck: {
+        healthyHttpCodes: '200,307',
+      },
     });
   }
 }

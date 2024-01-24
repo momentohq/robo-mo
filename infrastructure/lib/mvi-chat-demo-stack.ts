@@ -8,6 +8,12 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as path from 'path';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import {Duration} from 'aws-cdk-lib';
 
 export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
   constructor(
@@ -88,6 +94,37 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       openAiApiKeySecret,
       momentoApiKeySecret,
     });
+
+    const reindexLambda = new lambdaNodejs.NodejsFunction(
+      this,
+      'langserve-reindex-lambda',
+      {
+        functionName: 'langserve-reindex-lambda',
+        runtime: lambda.Runtime.NODEJS_18_X,
+        entry: path.join(
+          __dirname,
+          '../../lambdas/reindex-momento-data/handler.ts'
+        ),
+        projectRoot: path.join(__dirname, '../../lambdas/reindex-momento-data'),
+        depsLockFilePath: path.join(
+          __dirname,
+          '../../lambdas/reindex-momento-data/package-lock.json'
+        ),
+        handler: 'handler',
+        timeout: cdk.Duration.seconds(30),
+        memorySize: 128,
+        environment: {
+          ROBOMO_API_ENDPOINT: `${props.langserveDemoSubdomain}.${props.chatDomain}`,
+          ROBOMO_INDEX_NAME: 'momento', // TODO: make this configurable
+        },
+      }
+    );
+
+    const eventRule = new events.Rule(this, 'langserve-reindex-rule', {
+      schedule: events.Schedule.rate(Duration.days(7)),
+    });
+
+    eventRule.addTarget(new targets.LambdaFunction(reindexLambda));
   }
 
   addEcsApp(options: {

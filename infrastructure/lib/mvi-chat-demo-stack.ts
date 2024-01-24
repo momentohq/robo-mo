@@ -91,13 +91,16 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       momentoApiKeySecret,
     });
 
+    const momentoIndexName = 'momento';
     this.addEcsApp({
       appName: 'langserve-robomo',
       chatSubdomain: props.langserveDemoSubdomain,
       chatDomain: props.chatDomain,
       containerPort: 8080,
       dockerFilePath: '../langchain-robomo',
-      additionalEnvVars: {},
+      additionalEnvVars: {
+        MOMENTO_INDEX_NAME: momentoIndexName,
+      },
       vpc,
       hostedZone,
       openAiApiKeySecret,
@@ -112,7 +115,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
 
       new ScheduledReindexLambda(this, 'scheduled-reindex-lambda', {
         robomoApiEndpoint: `${props.langserveDemoSubdomain}.${props.chatDomain}`,
-        robomoIndexName: 'momento',
+        robomoIndexName: momentoIndexName,
       });
     }
   }

@@ -1,6 +1,6 @@
 set -ex
 
-export AWS_PROFILE=michael
+export AWS_PROFILE=dev
 
 echo "
 

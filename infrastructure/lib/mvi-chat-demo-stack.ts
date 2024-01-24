@@ -8,7 +8,8 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
-import { RobomoDiscordBot } from './robomo-discord-bot';
+import {RobomoDiscordBot} from './robomo-discord-bot';
+import {ScheduledReindexLambda} from './scheduled-reindex-lambda';
 
 export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
   constructor(
@@ -103,8 +104,17 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       momentoApiKeySecret,
     });
 
-    if (props.isProd)
-      new RobomoDiscordBot(this, 'robomo-discord-bot', {discordTokenSecret, slackTokenSecret});
+    if (props.isProd) {
+      new RobomoDiscordBot(this, 'robomo-discord-bot', {
+        discordTokenSecret,
+        slackTokenSecret,
+      });
+
+      new ScheduledReindexLambda(this, 'scheduled-reindex-lambda', {
+        robomoApiEndpoint: `${props.langserveDemoSubdomain}.${props.chatDomain}`,
+        robomoIndexName: 'momento',
+      });
+    }
   }
 
   addEcsApp(options: {

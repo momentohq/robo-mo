@@ -5,6 +5,10 @@ import {GetSecretValueCommand, SecretsManagerClient} from '@aws-sdk/client-secre
 const _secretsClient = new SecretsManagerClient({});
 const _cachedSecrets = new Map<string, string>();
 
+type RobomoAnswer = {
+  output: string;
+};
+
 async function main() {
   const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages],
@@ -31,8 +35,8 @@ async function main() {
             },
             body: JSON.stringify({input: message.cleanContent.replace('@RoboMo', '')}),
           });
-          const roboMoAnswer = await fetchResponse.json();
-          message.reply(roboMoAnswer['output']);
+          const roboMoAnswer: RobomoAnswer = (await fetchResponse.json()) as RobomoAnswer;
+          await message.reply(roboMoAnswer['output']);
           roboMoAnswered = true;
           break;
         } catch (error) {
@@ -41,7 +45,7 @@ async function main() {
         }
       }
       if (!roboMoAnswered) {
-        message.reply(
+        await message.reply(
           "Sorry, I'm having trouble answering your question right now. Please try again later or ask in the support channel to request help from Momento staff."
         );
       }
@@ -80,7 +84,7 @@ async function main() {
             console.log(`Successfully sent message ${result.ts} in conversation ${result.channel}`);
             break;
           } catch (error) {
-            console.error(`Error posting message to Slack: ${error}`);
+            console.error('Error posting message to Slack', error);
             await sleep(1000);
           }
         }
@@ -89,7 +93,7 @@ async function main() {
   });
 
   const discordToken = await getSecret('DiscordBotToken');
-  client.login(discordToken);
+  await client.login(discordToken);
 }
 
 function sleep(ms: number) {

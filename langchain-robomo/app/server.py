@@ -14,7 +14,6 @@ os.environ["MOMENTO_API_KEY"] = get_secret_from_env_var_or_secrets_manager(
     secret_name=os.environ.get("MOMENTO_API_KEY_SECRET_NAME"),
     aws_region=os.environ.get("AWS_REGION"),
 )
-print(f"Set MOMENTO_API_KEY to {os.environ['MOMENTO_API_KEY']}")
 os.environ["OPENAI_API_KEY"] = get_secret_from_env_var_or_secrets_manager(
     secret_env_var_name="OPENAI_API_KEY",
     secret_name=os.environ.get("OPENAI_API_KEY_SECRET_NAME"),

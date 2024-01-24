@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from langserve import add_routes
-from .secrets import get_secret_from_env_var_or_secrets_manager
 
+from .secrets import get_secret_from_env_var_or_secrets_manager
 
 os.environ["MOMENTO_API_KEY"] = get_secret_from_env_var_or_secrets_manager(
     secret_env_var_name="MOMENTO_API_KEY",

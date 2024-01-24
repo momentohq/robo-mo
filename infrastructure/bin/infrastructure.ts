@@ -34,7 +34,7 @@ if (isDevDeploy) {
   streamlitDemoSubdomain = 'web';
   langserveDemoSubdomain = 'robomo-ls';
 } else {
-  chatDomain = 'mochat-preprod.momentohq.com';
+  chatDomain = 'mochat.preprod.a.momentohq.com';
   streamlitDemoSubdomain = 'web';
   langserveDemoSubdomain = 'robomo-ls';
 }

@@ -4,9 +4,9 @@ import * as https from 'https';
 const endpoint = readEnvironmentVariable('ROBOMO_API_ENDPOINT');
 const indexName = readEnvironmentVariable('ROBOMO_INDEX_NAME');
 
-export function handler() {
+export async function handler() {
   try {
-    requestReindex(endpoint, indexName);
+    await requestReindex(endpoint, indexName);
 
     return {
       statusCode: 200,
@@ -35,25 +35,29 @@ function readEnvironmentVariable(name: string): string {
   return value;
 }
 
-function requestReindex(hostname: string, indexName: string) {
-  const options = {
-    hostname,
-    port: 443,
-    path: `/reindex/${indexName}`,
-    method: 'POST',
-  };
+function requestReindex(hostname: string, indexName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname,
+      port: 443,
+      path: `/reindex/${indexName}`,
+      method: 'POST',
+    };
 
-  const req = https.request(options, (res: IncomingMessage) => {
-    console.log(`statusCode: ${res.statusCode || 0}`);
+    const req = https.request(options, (res: IncomingMessage) => {
+      console.log(`statusCode: ${res.statusCode || 0}`);
 
-    res.on('data', (d: Uint8Array) => {
-      console.log(d.toString());
+      res.on('data', (d: Uint8Array) => {
+        console.log(d.toString());
+        resolve();
+      });
     });
-  });
 
-  req.on('error', error => {
-    console.error(error);
-  });
+    req.on('error', error => {
+      console.error(error);
+      reject(error);
+    });
 
-  req.end();
+    req.end();
+  });
 }

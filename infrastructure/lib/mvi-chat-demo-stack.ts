@@ -50,6 +50,18 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       chatDomain: props.chatDomain,
       containerPort: 80,
       dockerFilePath: '../',
+      additionalEnvVars: {
+        STREAMLIT_SERVER_ADDRESS: '0.0.0.0',
+        STREAMLIT_SERVER_PORT: `${80}`,
+        STREAMLIT_SERVER_HEADLESS: 'true',
+      },
+      dockerCommand: [
+        'poetry',
+        'run',
+        'streamlit',
+        'run',
+        'robo_mo/chatbot.py',
+      ],
       vpc,
       hostedZone,
       openAiApiKeySecret,
@@ -62,6 +74,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       chatDomain: props.chatDomain,
       containerPort: 8080,
       dockerFilePath: '../langchain-robomo',
+      additionalEnvVars: {},
       vpc,
       hostedZone,
       openAiApiKeySecret,
@@ -75,6 +88,8 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
     chatDomain: string;
     containerPort: number;
     dockerFilePath: string;
+    additionalEnvVars: {[key: string]: string};
+    dockerCommand?: string[];
     vpc: ec2.Vpc;
     hostedZone: route53.IHostedZone;
     openAiApiKeySecret: secrets.ISecret;
@@ -160,11 +175,9 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
         MOMENTO_API_KEY_SECRET_NAME: `${options.momentoApiKeySecret.secretName}`,
         OPENAI_API_KEY_SECRET_NAME: `${options.openAiApiKeySecret.secretName}`,
         AWS_REGION: `${this.region}`,
-        STREAMLIT_SERVER_ADDRESS: '0.0.0.0',
-        STREAMLIT_SERVER_PORT: `${options.containerPort}`,
-        STREAMLIT_SERVER_HEADLESS: 'true',
+        ...options.additionalEnvVars,
       },
-      command: ['poetry', 'run', 'streamlit', 'run', 'robo_mo/chatbot.py'],
+      command: options.dockerCommand,
       portMappings: [
         {containerPort: options.containerPort, hostPort: options.containerPort},
       ],

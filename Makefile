@@ -31,7 +31,7 @@ docker-run:
 	@docker run -p 8501:8501 -e MOMENTO_API_KEY=${MOMENTO_API_KEY} -e OPENAI_API_KEY=${OPENAI_API_KEY} -it robo-mo poetry run streamlit run robo_mo/chatbot.py
 
 build-common-ts:
-	cd infrastructure && npm ci --verbose && npm run build && cd ..
+	cd infrastructure && npm ci && npm run build && cd ..
 
 pull-request-ci: build-common-ts docker-build
 	cd infrastructure && MVI_CHAT_DOMAIN=sample.com MOCK_LOOKUPS_FOR_CI_SYNTH=true npx cdk --app "npx ts-node --prefer-ts-exts bin/infrastructure.ts" synth

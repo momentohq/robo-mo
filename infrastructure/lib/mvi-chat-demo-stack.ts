@@ -17,6 +17,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       chatDomain: string;
       streamlitDemoSubdomain: string;
       langserveDemoSubdomain: string;
+      isCi: boolean;
     },
     cdkStackProps?: cdk.StackProps
   ) {
@@ -40,17 +41,20 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
     });
 
     // Register the mo-chat subdomain and create a certificate for it
-    // const hostedZone = new route53.HostedZone(this, 'mvi-chat-hosted-zone', {
-    //   zoneName: props.chatDomain,
-    // });
-
-    const hostedZone = route53.HostedZone.fromLookup(
-      this,
-      'mvi-chat-hosted-zone',
-      {
-        domainName: props.chatDomain,
-      }
-    );
+    let hostedZone: cdk.aws_route53.IHostedZone
+    if (props.isCi) {
+        hostedZone = new route53.HostedZone(this, 'mvi-chat-hosted-zone', {
+          zoneName: props.chatDomain,
+        });
+    } else {
+      hostedZone = route53.HostedZone.fromLookup(
+        this,
+        'mvi-chat-hosted-zone',
+        {
+          domainName: props.chatDomain,
+        }
+      );
+    }
 
     this.addEcsApp({
       appName: 'mvi-chat-demo',

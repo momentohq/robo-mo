@@ -5,6 +5,7 @@ import { RobomoDns } from '../lib/robomo-dns';
 
 const isDevDeploy = process.env.IS_DEV_DEPLOY!;
 const isProd = process.env.DEPLOY_ORG === 'prod';
+const isCi = Boolean(process.env.MOCK_LOOKUPS_FOR_CI_SYNTH);
 
 let chatDomain: string | undefined;
 let streamlitDemoSubdomain: string | undefined =
@@ -53,6 +54,7 @@ new MomentoVectorIndexChatDemoStack(
     chatDomain,
     streamlitDemoSubdomain,
     langserveDemoSubdomain,
+    isCi,
   },
   {
     stackName: 'mvi-chat-demo',

@@ -2,6 +2,7 @@
 Code related to indexing and re-indexing Momento content.
 """
 import itertools
+import logging
 
 import nest_asyncio
 from bs4 import BeautifulSoup
@@ -14,15 +15,25 @@ from momento import CredentialProvider, PreviewVectorIndexClient, VectorIndexCon
 
 nest_asyncio.apply()
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 
 def reindex_content(index_name: str, momento_env_var_name: str = "MOMENTO_API_KEY") -> None:
+    logger.info(f"Reindexing {index_name} and using {momento_env_var_name} as the API key.")
+
     documents = load_content()
     chunked_documents = split_documents(documents)
     load_into_mvi(chunked_documents, index_name, momento_env_var_name)
 
+    logger.info(f"Reindexing {index_name} complete.")
+
 
 def load_content() -> list[Document]:
-    return load_tech_docs() + load_blogs()
+    logger.info("Loading content from Momento.")
+    content = load_tech_docs() + load_blogs()
+    logger.info(f"Loaded {len(content)} documents.")
+    return content
 
 
 def parse_content_fn(content: BeautifulSoup) -> str:
@@ -86,7 +97,11 @@ def load_into_mvi(documents: list[Document], index_name: str, momento_env_var_na
 
     # We are re-indexing all of the data.
     # There can be a small availability window where the index is not available or not fully populated.
+    logger.info(f"Deleting index {index_name} if it exists.")
     client.delete_index(index_name)
+
+    logger.info(f"Creating index {index_name} and indexing {len(documents)} document chunks.")
     embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")  # type: ignore
     ids = [f"{document.metadata['source']}, chunk={document.metadata['start_index']}" for document in documents]
     MomentoVectorIndex.from_documents(documents, embedding=embeddings, client=client, index_name=index_name, ids=ids)
+    logger.info(f"Indexing {len(documents)} document chunks complete.")

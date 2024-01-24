@@ -1,5 +1,6 @@
 import os
 
+import uvicorn
 from fastapi import BackgroundTasks, FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -43,6 +44,4 @@ async def reindex(index_name: str, background_tasks: BackgroundTasks):
 
 
 if __name__ == "__main__":
-    import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)

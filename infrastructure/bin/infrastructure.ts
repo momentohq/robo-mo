@@ -1,29 +1,40 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { MomentoVectorIndexChatDemoStack } from '../lib/mvi-chat-demo-stack';
+import {MomentoVectorIndexChatDemoStack} from '../lib/mvi-chat-demo-stack';
 
-const isDevDeploy = process.env.IS_DEV_DEPLOY!!;
+const isDevDeploy = process.env.IS_DEV_DEPLOY!;
 const isProd = process.env.DEPLOY_ORG === 'prod';
 
-let chatDomain: string | undefined = "";
-let chatSubdomain: string | undefined = process.env.MVI_CHAT_SUBDOMAIN;
+let chatDomain: string | undefined;
+let streamlitDemoSubdomain: string | undefined =
+  process.env.STREAMLIT_DEMO_SUBDOMAIN;
+let langserveDemoSubdomain: string | undefined =
+  process.env.LANGSERVE_DEMO_SUBDOMAIN;
 if (isDevDeploy) {
   chatDomain = process.env.MVI_CHAT_DOMAIN;
   if (chatDomain === undefined) {
     throw new Error('MVI_CHAT_DOMAIN environment variable must be set');
   }
-  if (chatSubdomain === undefined) {
+  if (streamlitDemoSubdomain === undefined) {
     console.log(
-      'MVI_CHAT_SUBDOMAIN environment variable not set, using "mo-chat"'
+      'STREAMLIT_DEMO_SUBDOMAIN environment variable not set, using "mo-chat"'
     );
-    chatSubdomain = 'mo-chat';
+    streamlitDemoSubdomain = 'mo-chat';
+  }
+  if (langserveDemoSubdomain === undefined) {
+    console.log(
+      'LANGSERVE_DEMO_SUBDOMAIN environment variable not set, using "robomo-ls"'
+    );
+    langserveDemoSubdomain = 'robomo-ls';
   }
 } else if (isProd) {
-  chatDomain = "mochat.momentohq.com"
-  chatSubdomain = "web"
+  chatDomain = 'mochat.momentohq.com';
+  streamlitDemoSubdomain = 'web';
+  langserveDemoSubdomain = 'robomo-ls';
 } else {
-  chatDomain = "mochat-preprod.momentohq.com"
-  chatSubdomain = "web"
+  chatDomain = 'mochat-preprod.momentohq.com';
+  streamlitDemoSubdomain = 'web';
+  langserveDemoSubdomain = 'robomo-ls';
 }
 
 const app = new cdk.App();
@@ -37,8 +48,11 @@ const env = {
 new MomentoVectorIndexChatDemoStack(
   app,
   'robo-mo',
-  chatSubdomain,
-  chatDomain,
+  {
+    chatDomain,
+    streamlitDemoSubdomain,
+    langserveDemoSubdomain,
+  },
   {
     stackName: 'mvi-chat-demo',
     ...env,

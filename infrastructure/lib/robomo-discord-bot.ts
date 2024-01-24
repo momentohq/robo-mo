@@ -4,6 +4,7 @@ import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
+import { LogGroup } from 'aws-cdk-lib/aws-logs';
 
 export class RobomoDiscordBot extends Construct {
   constructor(
@@ -22,6 +23,10 @@ export class RobomoDiscordBot extends Construct {
         directory: path.join(__dirname, "../../robomo-discord-bot")
       });
 
+      const logGroup = new LogGroup(this, 'Logs', {
+        logGroupName: "DiscordBotECSLogGroup"
+      });
+
       const taskDefinition = new ecs.FargateTaskDefinition(this, 'DiscordBotECS', {
         runtimePlatform: {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
@@ -31,6 +36,7 @@ export class RobomoDiscordBot extends Construct {
       taskDefinition.addContainer('DiscordBotECSContainer', {
         image: ecs.ContainerImage.fromDockerImageAsset(imageAsset),
         logging: new ecs.AwsLogDriver({
+          logGroup: logGroup,
           streamPrefix: "DiscordBotECS"
         }),
       });
@@ -48,7 +54,8 @@ export class RobomoDiscordBot extends Construct {
         props.discordTokenSecret.secretArn, 
         props.slackTokenSecret.secretArn,
         cluster.clusterArn, 
-        taskDefinition.taskDefinitionArn
+        taskDefinition.taskDefinitionArn,
+        logGroup.logGroupArn, 
       );
       taskDefinition.addToTaskRolePolicy(policy);
       taskDefinition.addToExecutionRolePolicy(policy);

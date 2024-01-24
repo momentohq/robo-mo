@@ -4,7 +4,6 @@ import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
-import 'dotenv/config';
 
 export class RobomoDiscordBot extends Construct {
   constructor(

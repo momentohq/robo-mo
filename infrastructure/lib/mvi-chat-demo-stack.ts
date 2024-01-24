@@ -8,7 +8,7 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
-import { RobomoDiscordBot } from './robomo-discord-bot';
+import {RobomoDiscordBot} from './robomo-discord-bot';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
@@ -141,7 +141,10 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
     eventRule.addTarget(new targets.LambdaFunction(reindexLambda));
 
     if (props.isProd)
-      new RobomoDiscordBot(this, 'robomo-discord-bot', {discordTokenSecret, slackTokenSecret});
+      new RobomoDiscordBot(this, 'robomo-discord-bot', {
+        discordTokenSecret,
+        slackTokenSecret,
+      });
   }
 
   addEcsApp(options: {

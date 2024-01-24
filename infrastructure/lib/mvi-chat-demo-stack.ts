@@ -124,6 +124,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       this,
       `${options.appName}-alb`,
       {
+        idleTimeout: cdk.Duration.seconds(60 * 10),
         vpc: options.vpc,
         internetFacing: true,
         securityGroup: loadBalancerSecurityGroup,
@@ -226,6 +227,9 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       port: options.containerPort,
       targets: [chatService],
       protocol: elbv2.ApplicationProtocol.HTTP,
+      healthCheck: {
+        healthyHttpCodes: '200,307',
+      },
     });
   }
 }

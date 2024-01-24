@@ -8,6 +8,7 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
 import {Construct} from 'constructs';
+import { RobomoDiscordBot } from './robomo-discord-bot';
 
 export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
   constructor(
@@ -33,6 +34,18 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       this,
       'momento-api-key-secret',
       'mvi/MomentoApiKey'
+    );
+
+    const discordTokenSecret = secrets.Secret.fromSecretNameV2(
+      this,
+      'discord-bot-token',
+      'DiscordBotToken'
+    );
+
+    const slackTokenSecret = secrets.Secret.fromSecretNameV2(
+      this,
+      'slack-channel-token',
+      'SlackToken'
     );
 
     const vpc = new ec2.Vpc(this, 'mvi-chat-demo-network', {
@@ -92,6 +105,9 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       openAiApiKeySecret,
       momentoApiKeySecret,
     });
+
+    // TODO: determine if pre-prod or prod environment, we want only one ECS instance in prod for now
+    new RobomoDiscordBot(this, 'robomo-discord-bot', {discordTokenSecret, slackTokenSecret});
   }
 
   addEcsApp(options: {

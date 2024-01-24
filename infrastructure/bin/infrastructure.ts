@@ -55,6 +55,7 @@ new MomentoVectorIndexChatDemoStack(
     streamlitDemoSubdomain,
     langserveDemoSubdomain,
     isCi,
+    isProd,
   },
   {
     stackName: 'mvi-chat-demo',

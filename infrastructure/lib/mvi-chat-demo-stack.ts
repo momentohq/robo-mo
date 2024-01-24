@@ -8,6 +8,7 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
+import { RobomoDiscordBot } from './robomo-discord-bot';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
@@ -24,6 +25,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       streamlitDemoSubdomain: string;
       langserveDemoSubdomain: string;
       isCi: boolean;
+      isProd: boolean;
     },
     cdkStackProps?: cdk.StackProps
   ) {
@@ -39,6 +41,18 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       this,
       'momento-api-key-secret',
       'mvi/MomentoApiKey'
+    );
+
+    const discordTokenSecret = secrets.Secret.fromSecretNameV2(
+      this,
+      'discord-bot-token',
+      'DiscordBotToken'
+    );
+
+    const slackTokenSecret = secrets.Secret.fromSecretNameV2(
+      this,
+      'slack-channel-token',
+      'SlackToken'
     );
 
     const vpc = new ec2.Vpc(this, 'mvi-chat-demo-network', {
@@ -125,6 +139,9 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
     });
 
     eventRule.addTarget(new targets.LambdaFunction(reindexLambda));
+
+    if (props.isProd)
+      new RobomoDiscordBot(this, 'robomo-discord-bot', {discordTokenSecret, slackTokenSecret});
   }
 
   addEcsApp(options: {

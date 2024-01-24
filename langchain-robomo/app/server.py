@@ -1,26 +1,27 @@
 import os
 
-from fastapi import FastAPI
+import uvicorn
+from fastapi import BackgroundTasks, FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from langserve import add_routes
-from .secrets import get_secret_from_env_var_or_secrets_manager
 
+from .secrets import get_secret_from_env_var_or_secrets_manager
 
 os.environ["MOMENTO_API_KEY"] = get_secret_from_env_var_or_secrets_manager(
     secret_env_var_name="MOMENTO_API_KEY",
     secret_name=os.environ.get("MOMENTO_API_KEY_SECRET_NAME"),
     aws_region=os.environ.get("AWS_REGION"),
 )
-print(f"Set MOMENTO_API_KEY to {os.environ['MOMENTO_API_KEY']}")
 os.environ["OPENAI_API_KEY"] = get_secret_from_env_var_or_secrets_manager(
     secret_env_var_name="OPENAI_API_KEY",
     secret_name=os.environ.get("OPENAI_API_KEY_SECRET_NAME"),
     aws_region=os.environ.get("AWS_REGION"),
 )
 
-from rag_momento_vector_index import chain as rag_momento_vector_index_chain
-from rag_momento_vector_index.index import reindex_content
+# Note the imports are here since they expect the above environment variables to be set
+from rag_momento_vector_index import chain as rag_momento_vector_index_chain  # noqa: E402
+from rag_momento_vector_index.index import reindex_content  # noqa: E402
 
 app = FastAPI()
 
@@ -31,7 +32,6 @@ async def redirect_root_to_docs():
 
 
 # Edit this to add the chain you want to add
-# add_routes(app, NotImplemented)
 add_routes(app, rag_momento_vector_index_chain, path="/rag-momento-vector-index")
 
 
@@ -40,12 +40,10 @@ app.mount("/playground2", StaticFiles(directory="playground2/dist", html=True), 
 
 
 @app.post("/reindex/{index_name}")
-async def reindex(index_name: str):
-    reindex_content(index_name)
-    return {"message": f"Reindexing {index_name} complete"}
+async def reindex(index_name: str, background_tasks: BackgroundTasks):
+    background_tasks.add_task(reindex_content, index_name)
+    return {"message": f"Reindexing {index_name} in progress."}
 
 
 if __name__ == "__main__":
-    import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)

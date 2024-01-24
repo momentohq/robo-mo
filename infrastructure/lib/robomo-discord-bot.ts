@@ -11,8 +11,8 @@ export class RobomoDiscordBot extends Construct {
     scope: Construct, 
     id: string, 
     props: {
-      discordTokenSecret: secrets.ISecret, 
-      slackTokenSecret: secrets.ISecret
+      discordTokenSecret: secrets.ISecret;
+      slackTokenSecret: secrets.ISecret;
     }
   ) {
       super(scope, id);

@@ -19,6 +19,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       streamlitDemoSubdomain: string;
       langserveDemoSubdomain: string;
       isCi: boolean;
+      isProd: boolean;
     },
     cdkStackProps?: cdk.StackProps
   ) {
@@ -106,8 +107,8 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       momentoApiKeySecret,
     });
 
-    // TODO: determine if pre-prod or prod environment, we want only one ECS instance in prod for now
-    new RobomoDiscordBot(this, 'robomo-discord-bot', {discordTokenSecret, slackTokenSecret});
+    if (props.isProd)
+      new RobomoDiscordBot(this, 'robomo-discord-bot', {discordTokenSecret, slackTokenSecret});
   }
 
   addEcsApp(options: {

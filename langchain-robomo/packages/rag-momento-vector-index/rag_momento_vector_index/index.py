@@ -6,10 +6,10 @@ import itertools
 import nest_asyncio
 from bs4 import BeautifulSoup
 from langchain.docstore.document import Document
-from langchain.document_loaders import SitemapLoader
-from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import TokenTextSplitter
-from langchain.vectorstores import MomentoVectorIndex
+from langchain_community.document_loaders import SitemapLoader
+from langchain_community.vectorstores import MomentoVectorIndex
+from langchain_openai import OpenAIEmbeddings
 from momento import CredentialProvider, PreviewVectorIndexClient, VectorIndexConfigurations
 
 nest_asyncio.apply()

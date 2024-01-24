@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from langserve import add_routes
+from rag_momento_vector_index import chain as rag_momento_vector_index_chain
+from rag_momento_vector_index.index import reindex_content
 
 from .secrets import get_secret_from_env_var_or_secrets_manager
 
@@ -19,9 +21,6 @@ os.environ["OPENAI_API_KEY"] = get_secret_from_env_var_or_secrets_manager(
     aws_region=os.environ.get("AWS_REGION"),
 )
 
-from rag_momento_vector_index import chain as rag_momento_vector_index_chain
-from rag_momento_vector_index.index import reindex_content
-
 app = FastAPI()
 
 
@@ -31,7 +30,6 @@ async def redirect_root_to_docs():
 
 
 # Edit this to add the chain you want to add
-# add_routes(app, NotImplemented)
 add_routes(app, rag_momento_vector_index_chain, path="/rag-momento-vector-index")
 
 

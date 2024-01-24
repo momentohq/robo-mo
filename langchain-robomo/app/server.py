@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI
+from fastapi import BackgroundTasks, FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from langserve import add_routes
@@ -38,9 +38,9 @@ app.mount("/playground2", StaticFiles(directory="playground2/dist", html=True), 
 
 
 @app.post("/reindex/{index_name}")
-async def reindex(index_name: str):
-    reindex_content(index_name)
-    return {"message": f"Reindexing {index_name} complete"}
+async def reindex(index_name: str, background_tasks: BackgroundTasks):
+    background_tasks.add_task(reindex_content, index_name)
+    return {"message": f"Reindexing {index_name} in progress."}
 
 
 if __name__ == "__main__":

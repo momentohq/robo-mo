@@ -5,8 +5,6 @@ from fastapi import BackgroundTasks, FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from langserve import add_routes
-from rag_momento_vector_index import chain as rag_momento_vector_index_chain
-from rag_momento_vector_index.index import reindex_content
 
 from .secrets import get_secret_from_env_var_or_secrets_manager
 
@@ -20,6 +18,10 @@ os.environ["OPENAI_API_KEY"] = get_secret_from_env_var_or_secrets_manager(
     secret_name=os.environ.get("OPENAI_API_KEY_SECRET_NAME"),
     aws_region=os.environ.get("AWS_REGION"),
 )
+
+# Note the imports are here since they expect the above environment variables to be set
+from rag_momento_vector_index import chain as rag_momento_vector_index_chain  # noqa: E402
+from rag_momento_vector_index.index import reindex_content  # noqa: E402
 
 app = FastAPI()
 

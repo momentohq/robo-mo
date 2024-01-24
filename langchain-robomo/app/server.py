@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import BackgroundTasks, FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from langserve import add_routes
 
 from .secrets import get_secret_from_env_var_or_secrets_manager
@@ -25,6 +26,17 @@ from rag_momento_vector_index.index import reindex_content  # noqa: E402
 
 app = FastAPI()
 
+origins = [
+    "*,
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def redirect_root_to_docs():

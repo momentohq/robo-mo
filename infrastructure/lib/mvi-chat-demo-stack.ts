@@ -1,3 +1,4 @@
+import {Construct} from 'constructs';
 import * as cdk from 'aws-cdk-lib';
 import * as certmgr from 'aws-cdk-lib/aws-certificatemanager';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
@@ -7,7 +8,6 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
-import {Construct} from 'constructs';
 
 export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
   constructor(

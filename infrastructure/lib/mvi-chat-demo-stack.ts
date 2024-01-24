@@ -23,213 +23,209 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
   ) {
     super(scope, id, cdkStackProps);
 
-      const openAiApiKeySecret = secrets.Secret.fromSecretNameV2(
-        this,
-        'open-ai-api-key-secret',
-        'mvi/OpenAiApiKey'
-      );
+    const openAiApiKeySecret = secrets.Secret.fromSecretNameV2(
+      this,
+      'open-ai-api-key-secret',
+      'mvi/OpenAiApiKey'
+    );
 
-      const momentoApiKeySecret = secrets.Secret.fromSecretNameV2(
-        this,
-        'momento-api-key-secret',
-        'mvi/MomentoApiKey'
-      );
+    const momentoApiKeySecret = secrets.Secret.fromSecretNameV2(
+      this,
+      'momento-api-key-secret',
+      'mvi/MomentoApiKey'
+    );
 
-      const vpc = new ec2.Vpc(this, 'mvi-chat-demo-network', {
-        vpcName: 'mvi-chat-demo-network',
-        maxAzs: 2,
+    const vpc = new ec2.Vpc(this, 'mvi-chat-demo-network', {
+      vpcName: 'mvi-chat-demo-network',
+      maxAzs: 2,
+    });
+
+    // Register the mo-chat subdomain and create a certificate for it
+    let hostedZone: cdk.aws_route53.IHostedZone;
+    if (props.isCi) {
+      hostedZone = new route53.HostedZone(this, 'mvi-chat-hosted-zone', {
+        zoneName: props.chatDomain,
       });
-
-      // Register the mo-chat subdomain and create a certificate for it
-      let hostedZone: cdk.aws_route53.IHostedZone
-      if (props.isCi) {
-          hostedZone = new route53.HostedZone(this, 'mvi-chat-hosted-zone', {
-            zoneName: props.chatDomain,
-          });
-      } else {
-        hostedZone = route53.HostedZone.fromLookup(
-          this,
-          'mvi-chat-hosted-zone',
-          {
-            domainName: props.chatDomain,
-          }
-        );
-      }
-
-      this.addEcsApp({
-        appName: 'mvi-chat-demo',
-        chatSubdomain: props.streamlitDemoSubdomain,
-        chatDomain: props.chatDomain,
-        containerPort: 80,
-        dockerFilePath: '../',
-        additionalEnvVars: {
-          STREAMLIT_SERVER_ADDRESS: '0.0.0.0',
-          STREAMLIT_SERVER_PORT: `${80}`,
-          STREAMLIT_SERVER_HEADLESS: 'true',
-        },
-        dockerCommand: [
-          'poetry',
-          'run',
-          'streamlit',
-          'run',
-          'robo_mo/chatbot.py',
-        ],
-        vpc,
-        hostedZone,
-        openAiApiKeySecret,
-        momentoApiKeySecret,
-      });
-
-      this.addEcsApp({
-        appName: 'langserve-robomo',
-        chatSubdomain: props.langserveDemoSubdomain,
-        chatDomain: props.chatDomain,
-        containerPort: 8080,
-        dockerFilePath: '../langchain-robomo',
-        additionalEnvVars: {},
-        vpc,
-        hostedZone,
-        openAiApiKeySecret,
-        momentoApiKeySecret,
+    } else {
+      hostedZone = route53.HostedZone.fromLookup(this, 'mvi-chat-hosted-zone', {
+        domainName: props.chatDomain,
       });
     }
 
-    addEcsApp(options: {
-      appName: string;
-      chatSubdomain: string;
-      chatDomain: string;
-      containerPort: number;
-      dockerFilePath: string;
-      additionalEnvVars: {[key: string]: string};
-      dockerCommand?: string[];
-      vpc: ec2.Vpc;
-      hostedZone: route53.IHostedZone;
-      openAiApiKeySecret: secrets.ISecret;
-      momentoApiKeySecret: secrets.ISecret;
-    }) {
-      // ALB for TLS
-      const loadBalancerSecurityGroup = new ec2.SecurityGroup(
-        this,
-        `${options.appName}-alb-sg`,
-        {
-          securityGroupName: `${options.appName}-alb-sg`,
-          vpc: options.vpc,
-        }
-      );
-      loadBalancerSecurityGroup.addIngressRule(
-        ec2.Peer.anyIpv4(),
-        ec2.Port.allTcp()
-      );
-      const loadBalancer = new elbv2.ApplicationLoadBalancer(
-        this,
-        `${options.appName}-alb`,
-        {
-          idleTimeout: cdk.Duration.seconds(60 * 10),
-          vpc: options.vpc,
-          internetFacing: true,
-          securityGroup: loadBalancerSecurityGroup,
-        }
-      );
+    this.addEcsApp({
+      appName: 'mvi-chat-demo',
+      chatSubdomain: props.streamlitDemoSubdomain,
+      chatDomain: props.chatDomain,
+      containerPort: 80,
+      dockerFilePath: '../',
+      additionalEnvVars: {
+        STREAMLIT_SERVER_ADDRESS: '0.0.0.0',
+        STREAMLIT_SERVER_PORT: `${80}`,
+        STREAMLIT_SERVER_HEADLESS: 'true',
+      },
+      dockerCommand: [
+        'poetry',
+        'run',
+        'streamlit',
+        'run',
+        'robo_mo/chatbot.py',
+      ],
+      vpc,
+      hostedZone,
+      openAiApiKeySecret,
+      momentoApiKeySecret,
+    });
 
-      new route53.ARecord(this, `${options.appName}-dns-a-record`, {
-        zone: options.hostedZone,
-        recordName: options.chatSubdomain,
-        target: route53.RecordTarget.fromAlias(
-          new route53Targets.LoadBalancerTarget(loadBalancer)
-        ),
-      });
+    this.addEcsApp({
+      appName: 'langserve-robomo',
+      chatSubdomain: props.langserveDemoSubdomain,
+      chatDomain: props.chatDomain,
+      containerPort: 8080,
+      dockerFilePath: '../langchain-robomo',
+      additionalEnvVars: {},
+      vpc,
+      hostedZone,
+      openAiApiKeySecret,
+      momentoApiKeySecret,
+    });
+  }
 
-      const certificate = new certmgr.Certificate(
-        this,
-        `${options.appName}-cert`,
-        {
-          domainName: `${options.chatSubdomain}.${options.chatDomain}`,
-          validation: certmgr.CertificateValidation.fromDns(options.hostedZone),
-        }
-      );
-
-      const listener = loadBalancer.addListener(
-        `${options.appName}-alb-listener`,
-        {
-          port: 443,
-          certificates: [
-            elbv2.ListenerCertificate.fromCertificateManager(certificate),
-          ],
-        }
-      );
-
-      // Chat demo Fargate service
-      const cluster = new ecs.Cluster(this, `${options.appName}-cluster`, {
-        clusterName: `${options.appName}-cluster`,
+  addEcsApp(options: {
+    appName: string;
+    chatSubdomain: string;
+    chatDomain: string;
+    containerPort: number;
+    dockerFilePath: string;
+    additionalEnvVars: {[key: string]: string};
+    dockerCommand?: string[];
+    vpc: ec2.Vpc;
+    hostedZone: route53.IHostedZone;
+    openAiApiKeySecret: secrets.ISecret;
+    momentoApiKeySecret: secrets.ISecret;
+  }) {
+    // ALB for TLS
+    const loadBalancerSecurityGroup = new ec2.SecurityGroup(
+      this,
+      `${options.appName}-alb-sg`,
+      {
+        securityGroupName: `${options.appName}-alb-sg`,
         vpc: options.vpc,
-      });
+      }
+    );
+    loadBalancerSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.allTcp()
+    );
+    const loadBalancer = new elbv2.ApplicationLoadBalancer(
+      this,
+      `${options.appName}-alb`,
+      {
+        idleTimeout: cdk.Duration.seconds(60 * 10),
+        vpc: options.vpc,
+        internetFacing: true,
+        securityGroup: loadBalancerSecurityGroup,
+      }
+    );
 
-      const chatDemoTaskDefinition = new ecs.FargateTaskDefinition(
-        this,
-        `${options.appName}-task-definition`,
-        {
-          cpu: 1024,
-          memoryLimitMiB: 2048,
-          runtimePlatform: {
-            operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
-            cpuArchitecture: ecs.CpuArchitecture.X86_64,
-          },
-        }
-      );
-      options.openAiApiKeySecret.grantRead(chatDemoTaskDefinition.taskRole);
-      options.momentoApiKeySecret.grantRead(chatDemoTaskDefinition.taskRole);
+    new route53.ARecord(this, `${options.appName}-dns-a-record`, {
+      zone: options.hostedZone,
+      recordName: options.chatSubdomain,
+      target: route53.RecordTarget.fromAlias(
+        new route53Targets.LoadBalancerTarget(loadBalancer)
+      ),
+    });
 
-      chatDemoTaskDefinition.addContainer(`${options.appName}-container`, {
-        containerName: options.appName,
-        image: ecs.ContainerImage.fromAsset(options.dockerFilePath, {
-          platform: Platform.LINUX_AMD64,
-        }),
-        environment: {
-          MOMENTO_API_KEY_SECRET_NAME: `${options.momentoApiKeySecret.secretName}`,
-          OPENAI_API_KEY_SECRET_NAME: `${options.openAiApiKeySecret.secretName}`,
-          AWS_REGION: `${this.region}`,
-          ...options.additionalEnvVars,
-        },
-        command: options.dockerCommand,
-        portMappings: [
-          {containerPort: options.containerPort, hostPort: options.containerPort},
+    const certificate = new certmgr.Certificate(
+      this,
+      `${options.appName}-cert`,
+      {
+        domainName: `${options.chatSubdomain}.${options.chatDomain}`,
+        validation: certmgr.CertificateValidation.fromDns(options.hostedZone),
+      }
+    );
+
+    const listener = loadBalancer.addListener(
+      `${options.appName}-alb-listener`,
+      {
+        port: 443,
+        certificates: [
+          elbv2.ListenerCertificate.fromCertificateManager(certificate),
         ],
-        logging: new ecs.AwsLogDriver({
-          streamPrefix: options.appName,
-        }),
-      });
+      }
+    );
 
-      const chatDemoSecurityGroup = new ec2.SecurityGroup(
-        this,
-        `${options.appName}-security-group`,
-        {
-          securityGroupName: options.appName,
-          vpc: options.vpc,
-        }
-      );
-      chatDemoSecurityGroup.connections.allowFrom(
-        loadBalancerSecurityGroup,
-        ec2.Port.tcp(options.containerPort)
-      );
+    // Chat demo Fargate service
+    const cluster = new ecs.Cluster(this, `${options.appName}-cluster`, {
+      clusterName: `${options.appName}-cluster`,
+      vpc: options.vpc,
+    });
 
-      const chatService = new ecs.FargateService(
-        this,
-        `${options.appName}-service`,
-        {
-          serviceName: options.appName,
-          cluster,
-          taskDefinition: chatDemoTaskDefinition,
-          securityGroups: [chatDemoSecurityGroup],
-        }
-      );
-
-      listener.addTargets(`${options.appName}-target`, {
-        port: options.containerPort,
-        targets: [chatService],
-        protocol: elbv2.ApplicationProtocol.HTTP,
-        healthCheck: {
-          healthyHttpCodes: '200,307',
+    const chatDemoTaskDefinition = new ecs.FargateTaskDefinition(
+      this,
+      `${options.appName}-task-definition`,
+      {
+        cpu: 1024,
+        memoryLimitMiB: 2048,
+        runtimePlatform: {
+          operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+          cpuArchitecture: ecs.CpuArchitecture.X86_64,
         },
-      });
+      }
+    );
+    options.openAiApiKeySecret.grantRead(chatDemoTaskDefinition.taskRole);
+    options.momentoApiKeySecret.grantRead(chatDemoTaskDefinition.taskRole);
+
+    chatDemoTaskDefinition.addContainer(`${options.appName}-container`, {
+      containerName: options.appName,
+      image: ecs.ContainerImage.fromAsset(options.dockerFilePath, {
+        platform: Platform.LINUX_AMD64,
+      }),
+      environment: {
+        MOMENTO_API_KEY_SECRET_NAME: `${options.momentoApiKeySecret.secretName}`,
+        OPENAI_API_KEY_SECRET_NAME: `${options.openAiApiKeySecret.secretName}`,
+        AWS_REGION: `${this.region}`,
+        ...options.additionalEnvVars,
+      },
+      command: options.dockerCommand,
+      portMappings: [
+        {containerPort: options.containerPort, hostPort: options.containerPort},
+      ],
+      logging: new ecs.AwsLogDriver({
+        streamPrefix: options.appName,
+      }),
+    });
+
+    const chatDemoSecurityGroup = new ec2.SecurityGroup(
+      this,
+      `${options.appName}-security-group`,
+      {
+        securityGroupName: options.appName,
+        vpc: options.vpc,
+      }
+    );
+    chatDemoSecurityGroup.connections.allowFrom(
+      loadBalancerSecurityGroup,
+      ec2.Port.tcp(options.containerPort)
+    );
+
+    const chatService = new ecs.FargateService(
+      this,
+      `${options.appName}-service`,
+      {
+        serviceName: options.appName,
+        cluster,
+        taskDefinition: chatDemoTaskDefinition,
+        securityGroups: [chatDemoSecurityGroup],
+      }
+    );
+
+    listener.addTargets(`${options.appName}-target`, {
+      port: options.containerPort,
+      targets: [chatService],
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      healthCheck: {
+        healthyHttpCodes: '200,307',
+      },
+    });
   }
 }

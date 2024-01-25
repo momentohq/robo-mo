@@ -64,6 +64,9 @@ export class RobomoDiscordBot extends Construct {
     taskDefinition.addToTaskRolePolicy(policy);
     taskDefinition.addToExecutionRolePolicy(policy);
 
+    props.discordTokenSecret.grantRead(taskDefinition.taskRole);
+    props.slackTokenSecret.grantRead(taskDefinition.taskRole);
+
     new ecs.FargateService(this, 'DiscordBotECSFargateService', {
       cluster,
       taskDefinition,

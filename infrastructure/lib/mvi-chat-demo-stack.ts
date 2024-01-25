@@ -8,8 +8,8 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
-import {RobomoDiscordBot} from './robomo-discord-bot';
-import {ScheduledReindexLambda} from './scheduled-reindex-lambda';
+import {RobomoDiscordBot} from './constructs/robomo-discord-bot';
+import {ScheduledReindexLambda} from './constructs/scheduled-reindex-lambda';
 
 export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
   constructor(

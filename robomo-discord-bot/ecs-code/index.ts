@@ -78,7 +78,7 @@ async function main() {
         for (let i = 0; i < 3; i++) {
           try {
             const result = await web.chat.postMessage({
-              text: `Discord user requesting support: ${message.cleanContent} \nhttps://discord.com/channels/${message.guild?.id}/${message.channel.id}/${message.id}`,
+              text: `${message.author.displayName} requesting support: ${message.cleanContent} \nhttps://discord.com/channels/${message.guild?.id}/${message.channel.id}/${message.id}`,
               channel: slackChannelId,
             });
             console.log(`Successfully sent message ${result.ts} in conversation ${result.channel}`);

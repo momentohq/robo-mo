@@ -28,12 +28,12 @@ export class ScheduledReindexLambda extends Construct {
         runtime: lambda.Runtime.NODEJS_18_X,
         entry: path.join(
           __dirname,
-          '../../lambdas/reindex-momento-data/handler.ts'
+          '../../../lambdas/reindex-momento-data/handler.ts'
         ),
-        projectRoot: path.join(__dirname, '../../lambdas/reindex-momento-data'),
+        projectRoot: path.join(__dirname, '../../../lambdas/reindex-momento-data'),
         depsLockFilePath: path.join(
           __dirname,
-          '../../lambdas/reindex-momento-data/package-lock.json'
+          '../../../lambdas/reindex-momento-data/package-lock.json'
         ),
         handler: 'handler',
         timeout: cdk.Duration.seconds(30),

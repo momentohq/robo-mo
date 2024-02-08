@@ -20,7 +20,7 @@ export class RobomoDiscordBot extends Construct {
     const cluster = new ecs.Cluster(this, 'DiscordBotFargateCluster');
 
     const imageAsset = new DockerImageAsset(this, 'DiscordBotECSDockerImage', {
-      directory: path.join(__dirname, '../../robomo-discord-bot'),
+      directory: path.join(__dirname, '../../../robomo-discord-bot'),
     });
 
     const logGroup = new LogGroup(this, 'Logs');
@@ -53,8 +53,6 @@ export class RobomoDiscordBot extends Construct {
       ],
     });
     policy.addResources(
-      props.discordTokenSecret.secretArn,
-      props.slackTokenSecret.secretArn,
       cluster.clusterArn,
       taskDefinition.taskDefinitionArn,
       logGroup.logGroupArn

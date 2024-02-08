@@ -6,7 +6,5 @@ COPY ecs-code/dist/index.js ./
 COPY ecs-code/package.json ./
 RUN npm install
 
-ENV DISCORD_BOT_TOKEN="DiscordBotToken"
-ENV SLACK_TOKEN="SlackToken"
 CMD ["npm", "run", "start"]
 

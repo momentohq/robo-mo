@@ -93,7 +93,8 @@ async function main() {
   });
 
   const discordToken = await getSecret('DiscordBotToken');
-  await client.login(discordToken);
+  const tokenJson = JSON.parse(discordToken);
+  await client.login(tokenJson['discord-bot-token']);
 }
 
 function sleep(ms: number) {
@@ -102,7 +103,8 @@ function sleep(ms: number) {
 
 async function getSlackClient(): Promise<WebClient> {
   const token = await getSecret('SlackToken');
-  const client = new WebClient(token);
+  const tokenJson = JSON.parse(token);
+  const client = new WebClient(tokenJson['slack-channel-token']);
   return client;
 }
 

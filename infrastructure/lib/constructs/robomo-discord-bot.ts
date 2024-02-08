@@ -23,7 +23,9 @@ export class RobomoDiscordBot extends Construct {
       directory: path.join(__dirname, '../../../robomo-discord-bot'),
     });
 
-    const logGroup = new LogGroup(this, 'Logs');
+    const logGroup = new LogGroup(this, 'Logs', {
+      logGroupName: 'DiscordBotECSLogGroup',
+    });
 
     const taskDefinition = new ecs.FargateTaskDefinition(
       this,

@@ -9,6 +9,14 @@ type RobomoAnswer = {
   output: string;
 };
 
+type DiscordToken = {
+  'discord-bot-token': string;
+};
+
+type SlackToken = {
+  'slack-channel-token': string;
+};
+
 async function main() {
   const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages],
@@ -92,8 +100,8 @@ async function main() {
     }
   });
 
-  const discordToken = await getSecret('DiscordBotToken');
-  const tokenJson = JSON.parse(discordToken);
+  const discordToken: string = await getSecret('DiscordBotToken');
+  const tokenJson: DiscordToken = JSON.parse(discordToken);
   await client.login(tokenJson['discord-bot-token']);
 }
 
@@ -102,8 +110,8 @@ function sleep(ms: number) {
 }
 
 async function getSlackClient(): Promise<WebClient> {
-  const token = await getSecret('SlackToken');
-  const tokenJson = JSON.parse(token);
+  const token: string = await getSecret('SlackToken');
+  const tokenJson: SlackToken = JSON.parse(token);
   const client = new WebClient(tokenJson['slack-channel-token']);
   return client;
 }

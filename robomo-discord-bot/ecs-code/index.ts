@@ -56,14 +56,14 @@ async function main() {
     for (const supportChannel of supportChannels.values()) {
       if (message.channel.id === supportChannel?.id && !message.author.bot) {
         console.log('Support channel message: ' + message.cleanContent);
-  
+
         // get the id of the newest message in the last 11 messages because it's the one that was just posted
         const lastElevenMessages = await message.channel.messages.fetch({limit: 11});
         const fiveMinutes = 5 * 60 * 1000;
         const newestMessageId = lastElevenMessages.reduce((newest, obj) =>
           newest === null ? obj : obj.createdTimestamp > newest.createdTimestamp ? obj : newest
         ).id;
-  
+
         // make sure message is the first from a user in the last 5 minutes (don't want to spam our Slack channel)
         if (
           lastElevenMessages.some(
@@ -92,7 +92,6 @@ async function main() {
         }
       }
     }
-    
   });
 
   const discordToken: string = await getSecret('DiscordBotToken');

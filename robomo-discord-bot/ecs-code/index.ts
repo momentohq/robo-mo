@@ -52,44 +52,47 @@ async function main() {
     }
 
     // Cross-post messages in the #support channel to a Slack channel
-    const supportChannel = message.guild?.channels.cache.find(channel => channel.name === 'support');
-    if (message.channel.id === supportChannel?.id && !message.author.bot) {
-      console.log('Support channel message: ' + message.cleanContent);
-
-      // get the id of the newest message in the last 11 messages because it's the one that was just posted
-      const lastElevenMessages = await message.channel.messages.fetch({limit: 11});
-      const fiveMinutes = 5 * 60 * 1000;
-      const newestMessageId = lastElevenMessages.reduce((newest, obj) =>
-        newest === null ? obj : obj.createdTimestamp > newest.createdTimestamp ? obj : newest
-      ).id;
-
-      // make sure message is the first from a user in the last 5 minutes (don't want to spam our Slack channel)
-      if (
-        lastElevenMessages.some(
-          m =>
-            m.id !== newestMessageId &&
-            m.author.id === message.author.id &&
-            Date.now() - m.createdTimestamp < fiveMinutes
-        )
-      ) {
-        console.log('Not posting message to Slack because user has posted in the last 5 minutes');
-      } else {
-        // retry posting to slack 3 times before logging failure
-        for (let i = 0; i < 3; i++) {
-          try {
-            const result = await web.chat.postMessage({
-              text: `${message.author.displayName} requesting support: ${message.cleanContent} \nhttps://discord.com/channels/${message.guild?.id}/${message.channel.id}/${message.id}`,
-              channel: slackChannelId,
-            });
-            console.log(`Successfully sent message ${result.ts} in conversation ${result.channel}`);
-            break;
-          } catch (error) {
-            console.error('Error posting message to Slack', error);
-            await sleep(1000);
+    const supportChannels = message.guild?.channels.cache.filter(channel => channel.name.includes('support')) || [];
+    for (const supportChannel of supportChannels.values()) {
+      if (message.channel.id === supportChannel?.id && !message.author.bot) {
+        console.log('Support channel message: ' + message.cleanContent);
+  
+        // get the id of the newest message in the last 11 messages because it's the one that was just posted
+        const lastElevenMessages = await message.channel.messages.fetch({limit: 11});
+        const fiveMinutes = 5 * 60 * 1000;
+        const newestMessageId = lastElevenMessages.reduce((newest, obj) =>
+          newest === null ? obj : obj.createdTimestamp > newest.createdTimestamp ? obj : newest
+        ).id;
+  
+        // make sure message is the first from a user in the last 5 minutes (don't want to spam our Slack channel)
+        if (
+          lastElevenMessages.some(
+            m =>
+              m.id !== newestMessageId &&
+              m.author.id === message.author.id &&
+              Date.now() - m.createdTimestamp < fiveMinutes
+          )
+        ) {
+          console.log('Not posting message to Slack because user has posted in the last 5 minutes');
+        } else {
+          // retry posting to slack 3 times before logging failure
+          for (let i = 0; i < 3; i++) {
+            try {
+              const result = await web.chat.postMessage({
+                text: `${message.author.displayName} requesting support: ${message.cleanContent} \nhttps://discord.com/channels/${message.guild?.id}/${message.channel.id}/${message.id}`,
+                channel: slackChannelId,
+              });
+              console.log(`Successfully sent message ${result.ts} in conversation ${result.channel}`);
+              break;
+            } catch (error) {
+              console.error('Error posting message to Slack', error);
+              await sleep(1000);
+            }
           }
         }
       }
     }
+    
   });
 
   const discordToken: string = await getSecret('DiscordBotToken');

@@ -1,12 +1,10 @@
 import os
+import re
 
-from langchain.chains import ConversationalRetrievalChain
-from langchain.chains.qa_with_sources import load_qa_with_sources_chain
-from langchain.memory import ConversationBufferMemory
 from langchain.schema import Document, StrOutputParser
 from langchain_community.vectorstores import MomentoVectorIndex
 from langchain_core.pydantic_v1 import BaseModel
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from momento import (
     CredentialProvider,
@@ -48,8 +46,21 @@ def format_docs(docs: list[Document]) -> str:
     return "\n".join(outputs)
 
 
+def postprocess(response: str) -> str:
+    response = re.sub(r"SOURCES:\s*$", "", response)
+    response = re.sub(r"Source:(\s*-?\[.*?\]\(http)", "SOURCES:\\1", response)
+    response = re.sub(r"SOURCES:(\s)", "\n\n*SOURCES*:\\1", response)
+    return response
+
+
 model = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")  # type: ignore
-chain = {"context": retriever | format_docs, "question": RunnablePassthrough()} | QA_PROMPT | model | StrOutputParser()
+chain = (
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    | QA_PROMPT
+    | model
+    | StrOutputParser()
+    | RunnableLambda(postprocess)
+)
 
 
 # Add typing for input

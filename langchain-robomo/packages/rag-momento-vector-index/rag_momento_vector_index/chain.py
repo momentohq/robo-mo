@@ -1,8 +1,10 @@
 import os
 
+from langchain.chains import ConversationalRetrievalChain
+from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+from langchain.memory import ConversationBufferMemory
+from langchain.schema import Document, StrOutputParser
 from langchain_community.vectorstores import MomentoVectorIndex
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.pydantic_v1 import BaseModel
 from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -11,6 +13,8 @@ from momento import (
     PreviewVectorIndexClient,
     VectorIndexConfigurations,
 )
+
+from .prompts import QA_PROMPT
 
 API_KEY_ENV_VAR_NAME = "MOMENTO_API_KEY"
 if os.environ.get(API_KEY_ENV_VAR_NAME, None) is None:
@@ -24,6 +28,7 @@ MOMENTO_INDEX_NAME = os.environ.get("MOMENTO_INDEX_NAME", "langchain-test")
 # ingest.load(API_KEY_ENV_VAR_NAME, MOMENTO_INDEX_NAME)
 
 
+# Vector store setup
 vectorstore = MomentoVectorIndex(
     embedding=OpenAIEmbeddings(),
     client=PreviewVectorIndexClient(
@@ -34,21 +39,17 @@ vectorstore = MomentoVectorIndex(
 )
 retriever = vectorstore.as_retriever()
 
-# RAG prompt
-template = """Answer the question based only on the following context:
-{context}
-Question: {question}
-"""
-prompt = ChatPromptTemplate.from_template(template)
 
-# RAG
-model = ChatOpenAI()
-chain = (
-    {"context": retriever, "question": RunnablePassthrough()}
-    | prompt
-    | model
-    | StrOutputParser()
-)
+# Vector store post-processing
+def format_docs(docs: list[Document]) -> str:
+    outputs = []
+    for doc in docs:
+        outputs.append(f"Content: {doc.page_content}\nSource: {doc.metadata['source']}")
+    return "\n".join(outputs)
+
+
+model = ChatOpenAI(temperature=0, model="gpt-4-turbo-preview")  # type: ignore
+chain = {"context": retriever | format_docs, "question": RunnablePassthrough()} | QA_PROMPT | model | StrOutputParser()
 
 
 # Add typing for input

@@ -48,7 +48,7 @@ def format_docs(docs: list[Document]) -> str:
     return "\n".join(outputs)
 
 
-model = ChatOpenAI(temperature=0, model="gpt-4-turbo-preview")  # type: ignore
+model = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")  # type: ignore
 chain = {"context": retriever | format_docs, "question": RunnablePassthrough()} | QA_PROMPT | model | StrOutputParser()
 
 

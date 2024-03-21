@@ -8,17 +8,13 @@ WORKDIR /code
 
 COPY ./pyproject.toml ./README.md ./poetry.lock* ./
 
-COPY ./package[s] ./packages
+COPY ./packages ./packages
 
 RUN poetry install  --no-interaction --no-ansi --no-root
 
 COPY ./app ./app
 
 RUN poetry install --no-interaction --no-ansi
-
-RUN mkdir ./playground2
-
-COPY ./playground2/dist ./playground2/dist
 
 EXPOSE 8080
 

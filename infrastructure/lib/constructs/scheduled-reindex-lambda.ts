@@ -30,7 +30,10 @@ export class ScheduledReindexLambda extends Construct {
           __dirname,
           '../../../lambdas/reindex-momento-data/handler.ts'
         ),
-        projectRoot: path.join(__dirname, '../../../lambdas/reindex-momento-data'),
+        projectRoot: path.join(
+          __dirname,
+          '../../../lambdas/reindex-momento-data'
+        ),
         depsLockFilePath: path.join(
           __dirname,
           '../../../lambdas/reindex-momento-data/package-lock.json'

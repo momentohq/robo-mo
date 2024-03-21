@@ -20,7 +20,7 @@ export class RobomoDiscordBot extends Construct {
     const cluster = new ecs.Cluster(this, 'DiscordBotFargateCluster');
 
     const imageAsset = new DockerImageAsset(this, 'DiscordBotECSDockerImage', {
-      directory: path.join(__dirname, '../../../robomo-discord-bot'),
+      directory: path.join(__dirname, '../../../robo-mo-discord-bot'),
     });
 
     const logGroup = new LogGroup(this, 'Logs', {

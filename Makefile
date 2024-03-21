@@ -9,7 +9,7 @@ pipeline-synth: build-common-ts
 
 .PHONY: build-streamlit-docker
 build-streamlit-docker:
-	cd robo-mo-streamlit && docker build -t robo-mo -f Dockerfile .
+	cd robo-mo-streamlit && make build
 
 build-common-ts:
 	cd infrastructure && npm ci && npm run build && cd .. \

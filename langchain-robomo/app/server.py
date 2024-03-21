@@ -2,9 +2,8 @@ import os
 
 import uvicorn
 from fastapi import BackgroundTasks, FastAPI
-from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from langserve import add_routes
 
 from .secrets import get_secret_from_env_var_or_secrets_manager
@@ -38,6 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 async def redirect_root_to_docs():
     return RedirectResponse("/docs")
@@ -45,10 +45,6 @@ async def redirect_root_to_docs():
 
 # Edit this to add the chain you want to add
 add_routes(app, rag_momento_vector_index_chain, path="/rag-momento-vector-index")
-
-
-# app.mount("/static", StaticFiles(directory="frontend/build", html=True), name="static")
-app.mount("/playground2", StaticFiles(directory="playground2/dist", html=True), name="static")
 
 
 @app.post("/reindex/{index_name}")

@@ -16,10 +16,6 @@ COPY ./app ./app
 
 RUN poetry install --no-interaction --no-ansi
 
-RUN mkdir ./playground2
-
-COPY ./playground2/dist ./playground2/dist
-
 EXPOSE 8080
 
 CMD exec uvicorn app.server:app --host 0.0.0.0 --port 8080

@@ -72,7 +72,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       chatSubdomain: props.streamlitDemoSubdomain,
       chatDomain: props.chatDomain,
       containerPort: 80,
-      dockerFilePath: '../',
+      dockerFilePath: '../robo-mo-streamlit',
       additionalEnvVars: {
         STREAMLIT_SERVER_ADDRESS: '0.0.0.0',
         STREAMLIT_SERVER_PORT: `${80}`,

@@ -97,7 +97,7 @@ export class MomentoVectorIndexChatDemoStack extends cdk.Stack {
       chatSubdomain: props.langserveDemoSubdomain,
       chatDomain: props.chatDomain,
       containerPort: 8080,
-      dockerFilePath: '../langchain-robomo',
+      dockerFilePath: '../robo-mo-langserve',
       additionalEnvVars: {
         MOMENTO_INDEX_NAME: momentoIndexName,
       },

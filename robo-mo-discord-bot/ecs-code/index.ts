@@ -52,7 +52,10 @@ async function main() {
     }
 
     // Cross-post messages in the #support channel to a Slack channel
-    const supportChannels = message.guild?.channels.cache.filter(channel => channel.name.includes('support')) || [];
+    const supportChannels =
+      message.guild?.channels.cache.filter(
+        channel => channel.name.includes('support') || channel.name.includes('general')
+      ) || [];
     for (const supportChannel of supportChannels.values()) {
       if (message.channel.id === supportChannel?.id && !message.author.bot) {
         console.log('Support channel message: ' + message.cleanContent);

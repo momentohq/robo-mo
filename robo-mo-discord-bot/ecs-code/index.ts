@@ -23,35 +23,7 @@ async function main() {
   });
 
   client.on('messageCreate', async message => {
-    // Respond to any message that mentions the bot from any channel
-    if (message.mentions.users.has(botId) && !message.author.bot) {
-      let roboMoAnswered = false;
-      for (let i = 0; i < 3; i++) {
-        try {
-          const fetchResponse = await fetch('https://robomo-ls.mochat.momentohq.com/rag-momento-vector-index/invoke', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({input: message.cleanContent.replace('@RoboMo', '')}),
-          });
-          const roboMoAnswer: RobomoAnswer = (await fetchResponse.json()) as RobomoAnswer;
-          await message.reply(roboMoAnswer['output']);
-          roboMoAnswered = true;
-          break;
-        } catch (error) {
-          console.log('Error fetching answer from RoboMo:', error);
-          await sleep(1000);
-        }
-      }
-      if (!roboMoAnswered) {
-        await message.reply(
-          "Sorry, I'm having trouble answering your question right now. Please try again later or ask in the support channel to request help from Momento staff."
-        );
-      }
-    }
-
-    // Cross-post messages in the #support channel to a Slack channel
+    // Cross-post messages in the #support or #general channel to a Slack channel
     const supportChannels =
       message.guild?.channels.cache.filter(
         channel => channel.name.includes('support') || channel.name.includes('general')

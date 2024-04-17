@@ -5,21 +5,15 @@ import {GetSecretValueCommand, SecretsManagerClient} from '@aws-sdk/client-secre
 const _secretsClient = new SecretsManagerClient({});
 const _cachedSecrets = new Map<string, string>();
 
-type RobomoAnswer = {
-  output: string;
-};
-
 async function main() {
   const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages],
   });
   const web = await getSlackClient();
-  let botId = '';
   const slackChannelId = 'C06F6APVB6H';
 
   client.once('ready', readyClient => {
     console.log(`Logged in as ${readyClient.user.tag}!`);
-    botId = readyClient.user.id;
   });
 
   client.on('messageCreate', async message => {

@@ -23,7 +23,7 @@ async function main() {
         channel => channel.name.includes('support') || channel.name.includes('general')
       ) || [];
     for (const supportChannel of supportChannels.values()) {
-      if (message.channel.id === supportChannel?.id && !message.author.bot) {
+      if (message.channel.id === supportChannel?.id && !message.author.bot && message.cleanContent.length > 0) {
         console.log('Support channel message: ' + message.cleanContent);
 
         // get the id of the newest message in the last 11 messages because it's the one that was just posted

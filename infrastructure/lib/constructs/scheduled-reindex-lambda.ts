@@ -25,7 +25,7 @@ export class ScheduledReindexLambda extends Construct {
       'langserve-reindex-lambda',
       {
         functionName: 'langserve-reindex-lambda',
-        runtime: lambda.Runtime.NODEJS_22_X,
+        runtime: lambda.Runtime.NODEJS_20_X,
         entry: path.join(
           __dirname,
           '../../../lambdas/reindex-momento-data/handler.ts'

@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:18
+FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:20
 
 WORKDIR /usr/src/app
 
